@@ -1,5 +1,6 @@
 # motif-generator
-Scripts to generate short music functional ear training samples with answers embedded in id3 tag lyrics
+Scripts to generate short music functional ear training samples with answers embedded in id3 tag lyrics. An example set of samples are available in a zip file, MrEar.zip [here](https://drive.google.com/file/d/1Cz_VamZNYksHO103Yaw4znl60c0vda5j/view?usp=sharing).
+
 
 ## Overview
 
