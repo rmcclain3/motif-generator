@@ -66,7 +66,7 @@ I always use random shuffle and repeat 1 song when playing them.
 ## Generating New Samples
 
 Anyone interested in trying something different could vary the steps outlined below. Maybe try some of the
-options. I could say a lot more about things I've tinkered with. Adding the 
+options. I could say a lot more about things I've tinkered with.
 
 The following steps assume a unix environment (I use Cygwin).
 
@@ -99,7 +99,7 @@ Just run:
 
 This should generate 9 subdirectories with 400-500 .wav samples each. The 9 subdirs contain
 melody samples from:
-Diatonic (or Ionian), Mixolydian, Aeolian, Dorian, Harmonic Minor, Melodic Minor, Phrygian,
+Diatonic (Ionian), Mixolydian, Aeolian, Dorian, Harmonic Minor, Melodic Minor, Phrygian,
 Major Plus 1 Chromatic, and Minor Plus 1 Chromatic.
 
 This step also generates the gm_mp3.sh file for the next step.
