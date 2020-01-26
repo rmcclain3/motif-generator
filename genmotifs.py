@@ -26,7 +26,7 @@ class Scale(object):
         self.pcToStep = dict()
         self.pcToStepString = dict()
         self.stepToNote = dict()
-        self.top = 200
+        self.top = 400
         self.minNotes = 4
         self.maxNotes = 12
         self.mustFixPosition = None
@@ -116,7 +116,7 @@ class Diatonic(Scale):
         self.mustPitches = makeMustSet(['1', '3', '4', '7'])
         self.cue = [0, 4, 7, 12]        
         self.minPcs = 5
-        self.top = 400
+        self.top = 500
         self.moniker = 'io'
         
 Ionian = Diatonic
@@ -136,7 +136,6 @@ class Mixolydian(Scale):
         super(Mixolydian, self).__init__()
         self.cue = [0, 4, 7, 12]        
         self.mustPitches = makeMustSet(['1', '3', '4', '6', 'b7'])
-        self.top = 400
         self.moniker = 'mx'
 
 class Aeolian(Scale):
@@ -185,6 +184,7 @@ class MajorChromatics(Diatonic):
         super(MajorChromatics, self).__init__()
         self.cue = [0, 4, 7, 12]        
         self.nChromatics = 1
+        self.top = 800
         self.moniker = 'chj'
     
 class MinorChromatics(Aeolian):
@@ -193,6 +193,7 @@ class MinorChromatics(Aeolian):
         self.cue = [0, 3, 7, 12]        
         self.nChromatics = 1
         self.minPcs = 6
+        self.top = 500
         self.moniker = 'chn'
     
 class AllMinor(Scale):
