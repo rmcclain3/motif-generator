@@ -51,7 +51,9 @@ relative pitches.
 
 ## Using the Samples
 
-To try out some samples, find the zip file, MrEar.zip, download the zip file, and import the collections in the folders
+To try out some samples, find the zip file, MrEar.zip, for the time being I will just host it
+on my Google Drive [here](https://drive.google.com/file/d/1Cz_VamZNYksHO103Yaw4znl60c0vda5j/view?usp=sharing),
+download the zip file, and import the collections in the folders
 into a music library or onto a mobile device. Use a music app that can display id3 lyrics embedded in
 mp3 files (I have used the built in iPhone music app and MP3+ Player for iPhone). I would be
 interested in knowing of others for iPhone. Getting new samples
