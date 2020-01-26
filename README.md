@@ -38,22 +38,32 @@ miniscule compared to the ear training itself.
 
 I found that just listening to samples, trying to come up with the answer before peeking, and
 then continuing to sing the sample for a minute or two before moving on has greatly improved my
-ear. I liked doing it a lot more than using the ear training software, and all I needed was my
+ear. I liked doing it a lot more than using ear training software, and all I needed was my
 phone. Having bootstrapped myself into a better set of ears, I am lately
-getting back into ear training software and transcribing to improve.
+getting back into ear training software and transcribing.
+
+Each of these samples starts with a tonic cue, which is an arpeggiated major or minor triad. This
+provides some context to establish a key. I have experimented with no cue (sticking with a single key)
+and 1,5,1 as a cue also. Adding the cue happened after I read Dan Harrison's books, which emphasized
+the importance of the dominant pitch for tonal hearing. Using the cue to try and force your ear into
+a key allows for hearing chromatic passages as outside notes. My goal has been to recognize all 12
+relative pitches.
 
 ## Using the Samples
 
 To try out some samples, find the zip file, MrEar.zip, download the zip file, and import the collections in the folders
-into a music library or onto a mobile device. Use a music app that can will display id3 lyrics embedded in
+into a music library or onto a mobile device. Use a music app that can display id3 lyrics embedded in
 mp3 files (I have used the built in iPhone music app and MP3+ Player for iPhone). I would be
 interested in knowing of others for iPhone. Getting new samples
-onto the iPhone while experimenting has also been a tremendous pain! And one version of IOS dropped
-the lyrics display capability (but now back).
+onto the iPhone using iTunes while experimenting has been a tremendous pain! And one version of IOS dropped
+the lyrics display capability altogether (but now back).
 
 I always use random shuffle and repeat 1 song when playing them.
 
-## Generating the gm Samples
+## Generating New Samples
+
+Anyone interested in trying something different could vary the steps outlined below. Maybe try some of the
+options. I could say a lot more about things I've tinkered with. Adding the 
 
 The following steps assume a unix environment (I use Cygwin).
 
