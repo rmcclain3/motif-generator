@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 
 import sys, os, os.path, random, time, codecs, pdb
 import midimaker, midi
@@ -476,7 +476,7 @@ if __name__ == '__main__':
 
         # command line overrides defaults
         if fileBase == None:
-            fileBase = 'Samples'
+            fileBase = 'gm'
 
         lfp = codecs.open(fileBase + '.log', 'w', 'utf_16')
             
@@ -504,6 +504,8 @@ if __name__ == '__main__':
                 scaleMustFixPosition = mustFixPosition
             if nChromatics == 0:
                 scaleNChromatics = scale.nChromatics
+            else:
+                scaleNChromatics = nChromatics
             if minNotes == 0:
                 minGrams = scale.minNotes - 1
             else:
@@ -517,7 +519,7 @@ if __name__ == '__main__':
             if cue == None:
                 scaleCue = scale.cue
             if top == 0:
-                top = scale.top
+                scaleTop = scale.top
 
             motifs = []
 
