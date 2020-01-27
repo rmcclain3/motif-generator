@@ -15,7 +15,8 @@ good ears had generally spent many hours playing by ear, ie, learning to hear so
 and then play it, initially by trial and error, and eventually with less effort. That
 activity is akin to the process of transcribing, which I interpret as meaning to go directly
 from sound to symbol (which can either be demonstrated by notating the music or just playing
-or singing the music). I tried using ear training software, but my ability was so basic, it
+or singing the music using scale degrees or solfege).
+I tried using ear training software, but my ability was so basic, it
 was too boring. I wanted to try something more akin to transcribing. I hypothesized that a large
 data set of short mp3 files with music samples that I could put on my mobile phone might
 be able to exercise the same brain functions involved in transcribing music.
@@ -100,7 +101,7 @@ Just run:
 This should generate 9 subdirectories with 400-500 .wav samples each. The 9 subdirs contain
 melody samples from:
 Diatonic (Ionian), Mixolydian, Aeolian, Dorian, Harmonic Minor, Melodic Minor, Phrygian,
-Major Plus 1 Chromatic, and Minor Plus 1 Chromatic.
+Major Plus 1 Chromatic, and Minor (Aeolian) Plus 1 Chromatic.
 
 This step also generates the gm_mp3.sh file for the next step.
 
