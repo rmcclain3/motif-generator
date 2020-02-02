@@ -33,8 +33,8 @@ couldn't even guesss the answer intially, I would just check the answer and sing
 with solfege syllables. I restrict my solfege to just 12
 syllables, do re ra re me mi fa fi so le la te ti,
 (phonetically - doe rah ray may mee fah fee sow lay lah tay tee). The answers in the lyrics
-use scale degrees, which to me are less confusing than written solfege syllables
-(1 ♭2 2 ♭3 3 4 ♯4 5 ♭6 6 ♭7 7). The effort required to get fluent at
+use scale degrees (1 ♭2 2 ♭3 3 4 ♯4 5 ♭6 6 ♭7 7), which to me are less confusing than written solfege syllables.
+The effort required to get fluent at
 translating between the 12 written scale degrees and the 12 spoken solfege syllables was
 miniscule compared to the ear training itself.
 
