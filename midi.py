@@ -133,6 +133,29 @@ def getPitchNumbers(p):
                     numbers.append((e.pitch - base) % 12)
     return numbers
 
+def fixStart(p):
+    for e in p[0]:
+        if isinstance(e, midifile.NoteOnEvent) and e.velocity > 0:
+            if e.tick > 1:
+                e.tick = 1
+            return
+    
+def maxGap(p):
+    maxG = 0
+    off = True
+    currTick = 0
+    prevOffTick = currTick
+    for e in p[0]:
+        if not off and isinstance(e, midifile.NoteOffEvent) or (isinstance(e, midifile.NoteOnEvent) and e.velocity == 0):
+            prevOffTick = e.tick
+            off = True
+        elif off and isinstance(e, midifile.NoteOnEvent) and e.velocity > 0:
+            gap = e.tick - prevOffTick
+            if gap > maxG:
+                maxG = gap
+            on = True
+    return maxG
+    
 def getAsciiNoteNames(pcs):
     notes = [ asciiNoteNames[pc % 12] for pc in pcs ]
     return notes

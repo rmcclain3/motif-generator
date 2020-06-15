@@ -99,6 +99,8 @@ class Scale(object):
     def stringifyMotif(self, motif):
         degrees = []
         for x in motif:
+            if x == '=':
+                continue
             if x == 'r':
                 degrees.append('_')
             else:
@@ -204,6 +206,15 @@ class AllMinor(Scale):
         self.mustPitches = set()
         self.moniker = 'mn'
 
+class Chromatic(Scale):
+    def __init__(self):
+        self.stepToPc = dict([ (x+1,x) for x in xrange(12) ])
+        super(Chromatic, self).__init__()
+        self.pcToStepString = dict([(x, '%d' % (x,)) for x in xrange(0, 10)])
+        self.pcToStepString[10] = 't'
+        self.pcToStepString[11] = 'e'
+        self.moniker = 'cr'
+        
 # below unused so far
 class Acoustic(Scale):
     def __init__(self):
@@ -251,11 +262,12 @@ class Blues(Scale):
         self.stepToPc = dict([(1,0), (2,3), (3,5), (4,6), (5,7), (6,10)])
         super(Blues, self).__init__()
         self.minPcs = 6
-
 class NgramAnalyzer(object):
     def __init__(self):
         pass
 
+intervalName = dict([(i, ('U', 'm2', 'M2', 'm3', 'M3', 'P4', 'T', 'P5', 'm6', 'M6', 'm7', 'M7')[i]) for i in xrange(12)])
+    
 def havePitches(pitchSequence, pitchSet, mustSet, nChromatics, scaleSet):
     if not mustSet:
         return True
@@ -303,6 +315,8 @@ class Tone(object):
 def encodeMelody(mel):
     uChars = []
     for mp in mel:
+        if mp == '=':
+            continue
         if mp == 'r':
             uChars.append(u' ')
         else:
@@ -312,7 +326,7 @@ def encodeMelody(mel):
 
 def getTopMotifs(scale, nTop, minGrams, maxGrams, cue, startPitch,
                  conjunct, outside, unisons, minPcs, mustFix, mustSet,
-                 nChromatics, begOrEndSet, poisonSets, poisonSequences):
+                 nChromatics, begOrEndSet, poisonSets, poisonSequences, fileBase):
     tops = []
     for i in xrange(minGrams, maxGrams+1):
         if i == 14:
@@ -346,7 +360,7 @@ def getTopMotifs(scale, nTop, minGrams, maxGrams, cue, startPitch,
                     #pdb.set_trace()
                     if cue:
                         pitches = cue + ['r',] + pitches
-                    tops.append((count, pitches, scale))
+                    tops.append((count, pitches, scale, fileBase, None))
                     kept += 1
                     if kept >= nTop:
                         break
@@ -356,7 +370,54 @@ def getTopMotifs(scale, nTop, minGrams, maxGrams, cue, startPitch,
     tops.sort(reverse=True)
     tops = tops[:nTop]
     return tops
-            
+
+
+def outputMotifsToFile(lfp, motifs, maker, doMarker, doDump, doPdb, nKeys, base0, settleTime, oneIn, sleepTime, scale, scaleClassname):
+    #pdb.set_trace()
+    maker.skipSeconds(2.0)
+    if doMarker:
+        startTime, startFrame = maker.getTime()
+        maker.addMotif([0,])
+        stopTime, stopFrame = maker.getTime()
+        lfp.write(u'%s %d %.3f %.3f %d %d\n' % (u'marker', 0, startTime, stopTime, startFrame, stopFrame))
+        maker.skipSeconds(settleTime)
+        doMarker = False
+
+    if doDump:
+        for m in motifs:
+            print m
+        sys.exit()
+
+    if doPdb:
+        #pdb.set_trace()
+        pass
+    for iKey in xrange(nKeys):
+        key = base0 + iKey
+        maker.setTonic(key)
+        keyOctave = ((key -60) + 4 * 12) / 12
+        keyName = midi.getAsciiNoteName(key % 12).lower()
+
+        nMotifs = len(motifs)
+        for index, tup in enumerate(motifs):
+            if (iKey + index) % oneIn == 0:
+                count, motif, scale, motifString, fileBase, footnote = tup
+                startTime, startFrame = maker.getTime()
+                #pdb.set_trace()
+                maker.enqueueMotif(motif)
+                maker.flush()
+                maker.skipSeconds(sleepTime)
+                stopTime, stopFrame = maker.getTime()
+                logline = []
+                name = "%s_%s_%s%d_%s" % (fileBase, scale.moniker, keyName, keyOctave, motifString)
+                logline.append(u'%s %d %.3f %.3f %d %d ' % (name, 0, startTime, stopTime, startFrame, stopFrame))
+                emelody = encodeMelody(motif)
+                emelody = emelody + unicode(' ' + scaleClassname)
+                if footnote:
+                    emelody = emelody + unicode(' ' + footnote)
+                logline.append(u' Melody: ' + emelody)
+                lfp.write(u'%s\n' % (lf.join(logline),))
+                maker.skipSeconds(settleTime)                        
+    
 if __name__ == '__main__':
     options = ['help', 'pdb', 'petrucci=', 'scales=', 'top=', 'tempo=', 'sleep=',
                'key=', 'keyOctave=', 'nKeys=', 'oneIn=',
@@ -364,7 +425,8 @@ if __name__ == '__main__':
                'dump', 'starts=', 'must=', 'begorends=', 'fix',
                'chromatics=', 'cue=',
                'base=', 
-               'poisonSets=', 'poisonSequences='
+               'poisonSets=', 'poisonSequences=',
+               'dyads', 'descending', 'harmonic',
    ]
 
     def usage():
@@ -397,7 +459,7 @@ if __name__ == '__main__':
         poisonSets = []
         poisonSequences = []
         nChromatics = 0
-        fileBase = None
+        theFileBase = None
         sleepTime = 2.0  # time padded to the end of motif in .wav sample
         mustFixPosition = None
         global running, selectAnother, pause, Petrucci
@@ -405,6 +467,8 @@ if __name__ == '__main__':
         running = True
         pause = False
         doPdb = False
+        doDescending = False
+        doHarmonic = False
 
         #pdb.set_trace()
         opts, pargs = getopt.getopt(sys.argv[1:], '', options)
@@ -447,7 +511,7 @@ if __name__ == '__main__':
             elif opt == '--starts':
                 startPitches = val
             elif opt == '--base':
-                fileBase = val
+                theFileBase = val
             elif opt == '--must':
                 mustSet = set(map(int, val.split(',')))
             elif opt == '--begorends':
@@ -470,77 +534,125 @@ if __name__ == '__main__':
                 mustFixPosition = True
             elif opt == '--sleep':
                 sleepTime = float(val)
+            elif opt == '--dyads':
+                scaleClassnames = ['Dyad', ]
+                theFileBase = 'dya'
+                cue = [0, 7, 12]
+                oneIn = 4
+            elif opt == '--descending':
+                doDescending = True
+                theFileBase = 'dyd'
+            elif opt == '--harmonic':
+                doHarmonic = True
+                theFileBase = 'dyh'
+            else:
+                print opt,val
+                raise Exception, '%s %s?' % (opt,val)
 
+        if len(pargs) > 0:
+            raise Exception, '%s?' % [str(pargs),]
+            
         # set tonic for first scale (though this gets set again anyway)
         base0 = 60 + key + (keyOctave - 4) * 12
         maker = midimaker.Maker(base0, tempo)
 
         # command line overrides defaults
-        if fileBase == None:
-            fileBase = 'gm'
+        if theFileBase == None:
+            theFileBase = 'gm'
 
-        lfp = codecs.open(fileBase + '.log', 'w', 'utf_16')
+        lfp = codecs.open(theFileBase + '.log', 'w', 'utf_16')
             
         doMarker = True
+
+        motifs = []
 
         # I doubt that nChromatics > 0 is compatible with mustFixPosition
         if nChromatics > 0 and mustFixPosition:
             raise Exception, 'nChromatics > 0 and mustFixPosition'
 
         for scaleClassname in scaleClassnames:
-            scale = globals()[scaleClassname]()
-            if doPdb:
-                pdb.set_trace()
-            if mustSet == None:
-                scaleMustSet = scale.mustPitches
+            if scaleClassname == 'Dyad':
+                if doPdb:
+                    pdb.set_trace()
+                scale = Chromatic()
+                lowTonic = 0
+                highTonic = 12
+                for interval in xrange(1, 12):
+                    iName = intervalName[interval]
+                    fileBase = '%s_%s' % (theFileBase, iName)
+                    footnote = iName
+                    shortHalf = interval / 2
+                    longHalf = interval - shortHalf
+                    for i in xrange(lowTonic - shortHalf, highTonic - longHalf + 1):
+                        j = i + interval
+                        if doDescending:
+                            pitches = [j, i]
+                        elif doHarmonic:
+                            pitches = [ '=', i, j, '=' ] + ['r',] + [ '=', i, j, '=' ]
+                        else:
+                            pitches = [i, j]
+                        if cue:
+                            pitches = cue + ['r',] + pitches
+                        motifs.append( (1, pitches, scale, fileBase, footnote) )
             else:
-                scaleMustSet = mustSet
-            if startPitches:
-                scaleStartPitches = map(int, startPitches.split(','))
-            else:
-                scaleStartPitches = scale.getPitches()
-            if mustFixPosition == None:
-                scaleMustFixPosition = scale.mustFixPosition
-            else:
-                scaleMustFixPosition = mustFixPosition
-            if nChromatics == 0:
-                scaleNChromatics = scale.nChromatics
-            else:
-                scaleNChromatics = nChromatics
-            if minNotes == 0:
-                minGrams = scale.minNotes - 1
-            else:
-                minGrams = minNotes - 1
-            if maxNotes == 0:
-                maxGrams = scale.maxNotes - 1
-            else:
-                maxGrams = maxNotes - 1
-            if minPcs == 0:
-                minPcs = scale.minPcs
-            if cue == None:
-                scaleCue = scale.cue
-            if top == 0:
-                scaleTop = scale.top
+                scale = globals()[scaleClassname]()
+                if doPdb:
+                    pdb.set_trace()
+                if mustSet == None:
+                    scaleMustSet = scale.mustPitches
+                else:
+                    scaleMustSet = mustSet
+                if startPitches:
+                    scaleStartPitches = map(int, startPitches.split(','))
+                else:
+                    scaleStartPitches = scale.getPitches()
+                if mustFixPosition == None:
+                    scaleMustFixPosition = scale.mustFixPosition
+                else:
+                    scaleMustFixPosition = mustFixPosition
+                if nChromatics == 0:
+                    scaleNChromatics = scale.nChromatics
+                else:
+                    scaleNChromatics = nChromatics
+                if minNotes == 0:
+                    minGrams = scale.minNotes - 1
+                else:
+                    minGrams = minNotes - 1
+                if maxNotes == 0:
+                    maxGrams = scale.maxNotes - 1
+                else:
+                    maxGrams = maxNotes - 1
+                if minPcs == 0:
+                    scaleMinPcs = scale.minPcs
+                else:
+                    scaleMinPcs = minPcs
+                if cue == None:
+                    scaleCue = scale.cue
+                else:
+                    scaleCue = cue
+                if top == 0:
+                    scaleTop = scale.top
+                else:
+                    scaleTop = top
 
-            motifs = []
+                #pdb.set_trace()
+                for startPitch in scaleStartPitches:
+                    tops = getTopMotifs(scale, scaleTop, minGrams, maxGrams, scaleCue, startPitch,
+                                        conjunct, outside, unisons,
+                                        scaleMinPcs, scaleMustFixPosition, scaleMustSet,
+                                        scaleNChromatics, begOrEndSet, poisonSets, poisonSequences, theFileBase)
+                    motifs.extend(tops)
 
-            #pdb.set_trace()
-            for startPitch in scaleStartPitches:
-                tops = getTopMotifs(scale, top, minGrams, maxGrams, scaleCue, startPitch,
-                                    conjunct, outside, unisons, minPcs, scaleMustFixPosition, scaleMustSet,
-                                    nChromatics, begOrEndSet, poisonSets, poisonSequences)
-                motifs.extend(tops)
-
-            #pdb.set_trace()
-            motifs.sort(reverse=True)
-            motifs = motifs[:top]
+                #pdb.set_trace()
+                motifs.sort(reverse=True)
+                motifs = motifs[:scaleTop]
 
             #pdb.set_trace()                
-            # sort by filename
+            # sort by filename?
             countSorted = motifs
             motifs = []
             motifStringSet = set()
-            for count, motif, scale in countSorted:
+            for count, motif, scale, fileBase, footNote in countSorted:
                 motifString = scale.stringifyMotif(motif)
                 if motifString in motifStringSet:
                     nameBase = motifString + '_'
@@ -551,52 +663,10 @@ if __name__ == '__main__':
                 if motifString in motifStringSet:
                     continue
                 motifStringSet.add(motifString)
-                motifs.append( (count, motif, scale, motifString) )
-            motifs.sort()
+                motifs.append( (count, motif, scale, motifString, fileBase, footNote) )
 
             settleTime = 2.0 # time padded between samples
-
-            #pdb.set_trace()
-            maker.skipSeconds(2.0)
-            if doMarker:
-                startTime, startFrame = maker.getTime()
-                maker.addMotif([0,])
-                stopTime, stopFrame = maker.getTime()
-                lfp.write(u'%s %d %.3f %.3f %d %d\n' % (u'marker', 0, startTime, stopTime, startFrame, stopFrame))
-                maker.skipSeconds(settleTime)
-                doMarker = False
-
-            if doDump:
-                for m in motifs:
-                    print m
-                sys.exit()
-
-            if doPdb:
-                pdb.set_trace()
-            for iKey in xrange(nKeys):
-                key = base0 + iKey
-                maker.setTonic(key)
-                keyOctave = ((key -60) + 4 * 12) / 12
-                keyName = midi.getAsciiNoteName(key % 12).lower()
-
-                nMotifs = len(motifs)
-                iMotif = 1
-                for index, tup in enumerate(motifs):
-                    if (iKey + index) % oneIn == 0:
-                        count, motif, scale, motifString = tup
-                        startTime, startFrame = maker.getTime()
-                        #pdb.set_trace()
-                        maker.addMotif(motif)
-                        maker.skipSeconds(sleepTime)
-                        stopTime, stopFrame = maker.getTime()
-                        logline = []
-                        name = "%s_%s_%s%d_%s" % (fileBase, scale.moniker, keyName, keyOctave, motifString)
-                        logline.append(u'%s %d %.3f %.3f %d %d ' % (name, 0, startTime, stopTime, startFrame, stopFrame))
-                        emelody = encodeMelody(motif)
-                        logline.append(u' Melody: ' + emelody)
-                        lfp.write(u'%s\n' % (lf.join(logline),))
-                        maker.skipSeconds(settleTime)                        
-                        iMotif += 1
+            outputMotifsToFile(lfp, motifs, maker, doMarker, doDump, doPdb, nKeys, base0, settleTime, oneIn, sleepTime, scale, scaleClassname)
 
         # put a marker at the end to force reaper to continue past the last sample
         maker.addMotif([0,])
@@ -605,6 +675,6 @@ if __name__ == '__main__':
         lfp.close()
         #pdb.set_trace()
         maker.endTrack()
-        maker.write(fileBase + '.mid')
+        maker.write(theFileBase + '.mid')
         
 main()

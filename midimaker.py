@@ -84,7 +84,7 @@ class Maker(object):
                 self.addRest(value)
             else:
                 self.addNote(pitch, velocity, value)
-
+        
     def addQuarterNote(self, pitch, velocity):
         self.addNote(self, pitch, velocity, 'q')
 
@@ -102,7 +102,12 @@ class Maker(object):
         ticks = n * self.resolution / d
         self.skipTicks += ticks
         self.position += ticks
-        
+
+    def valueToTicks(self, value):
+        n,d = valueToTicksFactor[value]
+        ticks = n * self.resolution / d
+        return ticks
+    
     def enqueue(self, pitch, velocity, startTick, endTick):
         # skip rests
         if pitch != Rest:
@@ -111,6 +116,21 @@ class Maker(object):
             #print self.queue[-1]
             self.queue.append(midifile.NoteOffEvent(tick=endTick, pitch=midipitch, velocity=velocity))
             #print self.queue[-1]
+
+    def enqueueMotif(self, motif, value='q'):
+        velocity = 80
+        currTicks = 0
+        inChord = False
+        holdTicks = self.valueToTicks(value)
+        for pitch in motif:
+            if pitch == 'r':
+                currTicks += holdTicks
+            elif pitch == '=':
+                inChord = not inChord
+            else:
+                self.enqueue(pitch, velocity, currTicks, currTicks + holdTicks)
+                if not inChord:
+                    currTicks += holdTicks
 
     def flush(self):
         self.queue.sort(cmp=flushCmp)

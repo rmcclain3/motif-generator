@@ -63,7 +63,7 @@ if __name__ == '__main__':
                 continue
             mname, iSeg, start, stop, startFrame, stopFrame = words[0].split()
             if subdirs:
-                subdir = '_'.join(mname.split('_')[1:1+subdirs])
+                subdir = '_'.join(mname.split('_')[0:0+subdirs])
                 aname = bname + '_' + subdir  # album
                 tname = mname                  # title
                 mname = subdir + '/' + mname

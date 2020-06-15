@@ -78,7 +78,7 @@ if __name__ == '__main__':
                 line = line.split(lf, 1)[0]
             mname, iSeg, start, stop, startFrame, endFrame = line.strip().split()
             if subdirs and mname != 'marker':
-                subdir = '_'.join(mname.split('_')[1:1+subdirs])
+                subdir = '_'.join(mname.split('_')[0:subdirs])
                 if subdir != currSubdir:
                     try:
                         os.mkdir(wavdir + '/' + subdir, 0755)

@@ -114,3 +114,12 @@ Just run:
 This generated script runs `lame` to convert the .mp3 and then runs the python script - tagmotifs.py
 in order to extract the answers from the gm.log file and insert them as id3 tags in the .mp3 files.
 The .mp3 files are written to a directory tree under 'gm_mp3'.
+
+## Postscript
+
+Added an option to generate samples of chromatic dyads (two notes from the chromatic scale, either
+ascending, descending, or harmonic (simultaneously struck):
+
+`genmotifs.py --dyads`
+`genmotifs.py --dyads --descending`
+`genmotifs.py --dyads --harmonic`
