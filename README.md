@@ -31,7 +31,7 @@ To train the ear with these samples, it is probably best to take each collection
 on one at a time. Initially, I started with the Diatonic collection (Ionian mode). Since I
 couldn't even guesss the answer intially, I would just check the answer and sing along
 with solfege syllables. I restrict my solfege to just 12
-syllables, do re ra re me mi fa fi so le la te ti,
+syllables, do ra re me mi fa fi so le la te ti,
 (phonetically - doe rah ray may mee fah fee sow lay lah tay tee). The answers in the lyrics
 use scale degrees (1 ♭2 2 ♭3 3 4 ♯4 5 ♭6 6 ♭7 7), which to me are less confusing than written solfege syllables.
 The effort required to get fluent at
