@@ -8,7 +8,8 @@ frameRate = 44100
 # Tempo and tonic can be changed troughout the piece.
 # Has no concept of meter, just a quarter note beat.
 
-Rest = -9999
+Rest = 'r'
+ChordDelimiter = '='
 
 def flushCmp(x, y):
     val = cmp(x.tick, y.tick)
@@ -80,7 +81,7 @@ class Maker(object):
         ''' original version which just does monophonic quarter notes '''
         velocity = 80
         for pitch in motif:
-            if pitch == 'r':
+            if pitch == Rest:
                 self.addRest(value)
             else:
                 self.addNote(pitch, velocity, value)
@@ -123,9 +124,12 @@ class Maker(object):
         inChord = False
         holdTicks = self.valueToTicks(value)
         for pitch in motif:
-            if pitch == 'r':
+            if pitch == Rest:
                 currTicks += holdTicks
-            elif pitch == '=':
+            elif pitch == ChordDelimiter:
+                # advance currTicks once when completing chord
+                if inChord:
+                    currTicks += holdTicks
                 inChord = not inChord
             else:
                 self.enqueue(pitch, velocity, currTicks, currTicks + holdTicks)

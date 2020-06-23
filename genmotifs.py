@@ -2,6 +2,7 @@
 
 import sys, os, os.path, random, time, codecs, pdb
 import midimaker, midi
+from midimaker import Rest, ChordDelimiter
 
 Petrucci = '../Petrucci'
 
@@ -99,9 +100,9 @@ class Scale(object):
     def stringifyMotif(self, motif):
         degrees = []
         for x in motif:
-            if x == '=':
+            if x == ChordDelimiter:
                 continue
-            if x == 'r':
+            if x == Rest:
                 degrees.append('_')
             else:
                 p = x % 12
@@ -315,9 +316,9 @@ class Tone(object):
 def encodeMelody(mel):
     uChars = []
     for mp in mel:
-        if mp == '=':
+        if mp == ChordDelimiter:
             continue
-        if mp == 'r':
+        if mp == Rest:
             uChars.append(u' ')
         else:
             pc = mp % 12
@@ -359,7 +360,7 @@ def getTopMotifs(scale, nTop, minGrams, maxGrams, cue, startPitch,
 
                     #pdb.set_trace()
                     if cue:
-                        pitches = cue + ['r',] + pitches
+                        pitches = cue + [Rest,] + pitches
                     tops.append((count, pitches, scale, fileBase, None))
                     kept += 1
                     if kept >= nTop:
@@ -426,7 +427,7 @@ if __name__ == '__main__':
                'chromatics=', 'cue=',
                'base=', 
                'poisonSets=', 'poisonSequences=',
-               'dyads', 'descending', 'harmonic',
+               'dyads', 'ascending', 'descending', 'harmonic',
    ]
 
     def usage():
@@ -467,6 +468,7 @@ if __name__ == '__main__':
         running = True
         pause = False
         doPdb = False
+        doAscending = False
         doDescending = False
         doHarmonic = False
 
@@ -536,9 +538,12 @@ if __name__ == '__main__':
                 sleepTime = float(val)
             elif opt == '--dyads':
                 scaleClassnames = ['Dyad', ]
-                theFileBase = 'dya'
+                theFileBase = 'dy'
                 cue = [0, 7, 12]
                 oneIn = 4
+            elif opt == '--ascending':
+                doAscending = True
+                theFileBase = 'dya'
             elif opt == '--descending':
                 doDescending = True
                 theFileBase = 'dyd'
@@ -585,14 +590,20 @@ if __name__ == '__main__':
                     longHalf = interval - shortHalf
                     for i in xrange(lowTonic - shortHalf, highTonic - longHalf + 1):
                         j = i + interval
-                        if doDescending:
+                        if doAscending:
+                            pitches = [i, j]
+                        elif doDescending:
                             pitches = [j, i]
                         elif doHarmonic:
-                            pitches = [ '=', i, j, '=' ] + ['r',] + [ '=', i, j, '=' ]
+                            pitches = [ ChordDelimiter, i, j, ChordDelimiter ] + [Rest,] + [ ChordDelimiter, i, j, ChordDelimiter ]
                         else:
-                            pitches = [i, j]
+                            if cue:
+                                rcue = [Rest,] + cue
+                            else:
+                                rcue = []
+                            pitches = [ i, j ] + rcue + [Rest,] + [ j, i ] + rcue + [Rest,] + [ ChordDelimiter, i, j, ChordDelimiter ] + [Rest,] + [ ChordDelimiter, i, j, ChordDelimiter ]
                         if cue:
-                            pitches = cue + ['r',] + pitches
+                            pitches = cue + [Rest,] + pitches
                         motifs.append( (1, pitches, scale, fileBase, footnote) )
             else:
                 scale = globals()[scaleClassname]()
